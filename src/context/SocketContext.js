@@ -1,4 +1,3 @@
-// src/context/SocketContext.js
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -10,7 +9,8 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const s = io("http://localhost:5000");
+    const backendURL = process.env.REACT_APP_BACKEND_URL ;
+    const s = io(backendURL);
     setSocket(s);
 
     return () => s.disconnect();

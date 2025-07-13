@@ -10,7 +10,7 @@ import RoomCreate from "./pages/RoomCreate";
 import RoomJoin from "./pages/RoomJoin";
 import RoomPage from "./pages/RoomPage";
 import Lobby from "./pages/Lobby";
-import TestLogin from "./components/TestLogin";
+
 
 
 function App() {
@@ -33,7 +33,7 @@ function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/create" element={<RoomCreate />} />
       <Route path="/join" element={<RoomJoin />} />
-      <Route path="/test-login" element={<TestLogin />} />
+      
 
       
       <Route path="/lobby" element={<Lobby />} />

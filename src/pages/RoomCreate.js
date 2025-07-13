@@ -17,7 +17,7 @@ function RoomCreate() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/room/create",
+        `${process.env.REACT_APP_BACKEND_URL}/api/room/create`,
         {
           isPrivate,
           pin: isPrivate ? pin : undefined,
@@ -32,7 +32,6 @@ function RoomCreate() {
       setRoomId(newRoomId);
       setShowMsg(true);
 
-      // ⏳ Wait 10 seconds before navigating to room
       setTimeout(() => {
         navigate(`/room/${newRoomId}`);
       }, 10000);

@@ -13,12 +13,16 @@ function RoomJoin() {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.post("http://localhost:5000/api/room/join", {
-        roomId,
-        pin
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/api/room/join`,
+        {
+          roomId,
+          pin
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
 
       navigate(`/room/${roomId}`);
     } catch (err) {
