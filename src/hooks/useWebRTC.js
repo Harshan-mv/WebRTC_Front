@@ -1,4 +1,4 @@
-const Room = require("./models/Room");
+//const Room = require("./models/Room");
 
 let usersInRoom = {};         // roomId: [{ socketId, user }]
 let roomHostMap = {};         // roomId: hostName
