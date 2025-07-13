@@ -1,5 +1,4 @@
-// ✅ Updated VideoGrid component to use remoteStream
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import {
   FaMicrophoneSlash,
   FaHandPaper,
@@ -10,54 +9,57 @@ import {
 function VideoGrid({ peers, userVideo, peerStates, currentUser, localStream }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-      {/* Local User Video */}
+      {/* Local User */}
       <VideoTile
         videoRef={userVideo}
         name={currentUser?.name || "You"}
         muted={peerStates.localMuted}
         hand={peerStates.localHand}
         cameraOff={peerStates.localCameraOff}
-        showVideo
-        localStream={localStream}
+        isLocal
+        stream={localStream}
       />
 
       {/* Peers */}
       {peers.map(({ peerID, remoteStream, user }) => (
         <VideoTile
           key={peerID}
-          videoRef={null} // not needed for remote
           name={user?.name || "User"}
           muted={peerStates[peerID]?.muted}
           hand={peerStates[peerID]?.hand}
           cameraOff={peerStates[peerID]?.cameraOff}
-          showVideo={!!remoteStream}
-          remoteStream={remoteStream}
+          isLocal={false}
+          stream={remoteStream}
         />
       ))}
     </div>
   );
 }
 
-// 🧍 Local or Remote Tile
-function VideoTile({ videoRef, name, muted, hand, cameraOff, showVideo = false, localStream, remoteStream }) {
-  const ref = useRef();
+// 🧍 Reusable Video Tile
+function VideoTile({ videoRef, name, muted, hand, cameraOff, isLocal, stream }) {
+  const ref = videoRef || useRef();
 
   useEffect(() => {
-    const stream = localStream || remoteStream;
-    if (showVideo && !cameraOff && ref.current && stream) {
+    if (stream && ref.current && !cameraOff) {
       ref.current.srcObject = stream;
-      ref.current.play?.();
+      const playPromise = ref.current.play?.();
+      if (playPromise) {
+        playPromise.catch((err) => {
+          console.warn("Autoplay prevented or interrupted", err);
+        });
+      }
     }
-  }, [showVideo, cameraOff, localStream, remoteStream]);
+  }, [stream, cameraOff, ref]);
 
   return (
     <div className="relative w-full aspect-video bg-black rounded overflow-hidden shadow">
-      {showVideo && !cameraOff ? (
+      {!cameraOff && stream ? (
         <video
           ref={ref}
-          muted={!!localStream}
           autoPlay
           playsInline
+          muted={isLocal}
           className="w-full h-full object-cover transition-opacity duration-300"
         />
       ) : (
@@ -84,7 +86,7 @@ function Avatar({ name = "User" }) {
   );
 }
 
-// 🔘 Status bar at bottom of each tile
+// 🔘 Bottom bar
 function StatusBar({ name, muted, hand, cameraOff }) {
   return (
     <div className="absolute bottom-1 left-1 right-1 text-white bg-black bg-opacity-60 px-2 py-1 text-sm flex justify-between items-center rounded">
