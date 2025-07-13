@@ -1,3 +1,4 @@
+// ✅ Updated useWebRTC hook
 import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../context/SocketContext";
 import Peer from "simple-peer";
@@ -30,14 +31,14 @@ const useWebRTC = (roomId, currentUser) => {
       socket.on("all-users", (users) => {
         const peerConnections = users.map(({ socketId, user }) => {
           const peer = createPeer(socketId, socket.id, stream);
-          return { peerID: socketId, peer, user };
+          return { peerID: socketId, peer, user, remoteStream: null };
         });
         setPeers(peerConnections);
       });
 
       socket.on("user-joined", ({ signal, callerID, user }) => {
         const peer = addPeer(signal, callerID, stream);
-        setPeers((prev) => [...prev, { peerID: callerID, peer, user }]);
+        setPeers((prev) => [...prev, { peerID: callerID, peer, user, remoteStream: null }]);
       });
 
       socket.on("receiving-returned-signal", ({ id, signal }) => {
@@ -61,17 +62,37 @@ const useWebRTC = (roomId, currentUser) => {
 
   const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({ initiator: true, trickle: false, stream });
+
     peer.on("signal", (signal) => {
       socket.emit("sending-signal", { userToSignal, callerID, signal });
     });
+
+    peer.on("stream", (remoteStream) => {
+      setPeers((prev) =>
+        prev.map((p) =>
+          p.peerID === userToSignal ? { ...p, remoteStream } : p
+        )
+      );
+    });
+
     return peer;
   };
 
   const addPeer = (incomingSignal, callerID, stream) => {
     const peer = new Peer({ initiator: false, trickle: false, stream });
+
     peer.on("signal", (signal) => {
       socket.emit("returning-signal", { signal, callerID });
     });
+
+    peer.on("stream", (remoteStream) => {
+      setPeers((prev) =>
+        prev.map((p) =>
+          p.peerID === callerID ? { ...p, remoteStream } : p
+        )
+      );
+    });
+
     peer.signal(incomingSignal);
     return peer;
   };
@@ -89,31 +110,25 @@ const useWebRTC = (roomId, currentUser) => {
   const toggleCamera = async () => {
     let videoTrack = streamRef.current?.getVideoTracks()[0];
     if (videoTrack && videoTrack.readyState === "live") {
-      // Toggle enabled if track is live
       videoTrack.enabled = !videoTrack.enabled;
       const newStatus = !videoTrack.enabled;
       setPeerStates((prev) => ({ ...prev, localCameraOff: newStatus }));
       socket.emit("camera-status", { roomId, status: newStatus });
     } else {
-      // If no track or track ended, reacquire stream
       try {
         const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
         const newVideoTrack = newStream.getVideoTracks()[0];
         if (streamRef.current) {
-          // Remove old video tracks
           streamRef.current.getVideoTracks().forEach((t) => streamRef.current.removeTrack(t));
-          // Add new video track
           streamRef.current.addTrack(newVideoTrack);
         } else {
           streamRef.current = newStream;
         }
-        // Update local video element
         if (userVideo.current) {
           userVideo.current.srcObject = streamRef.current;
         }
-        // Replace video track in all peers
         peers.forEach(({ peer }) => {
-          const sender = peer._pc.getSenders().find(s => s.track && s.track.kind === 'video');
+          const sender = peer._pc.getSenders().find((s) => s.track && s.track.kind === "video");
           if (sender) {
             sender.replaceTrack(newVideoTrack);
           }

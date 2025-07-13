@@ -1,3 +1,4 @@
+// ✅ Updated VideoGrid component to use remoteStream
 import React, { useRef, useEffect, useState } from "react";
 import {
   FaMicrophoneSlash,
@@ -21,13 +22,16 @@ function VideoGrid({ peers, userVideo, peerStates, currentUser, localStream }) {
       />
 
       {/* Peers */}
-      {peers.map(({ peerID, peer, user }) => (
-        <PeerVideoTile
+      {peers.map(({ peerID, remoteStream, user }) => (
+        <VideoTile
           key={peerID}
-          peer={peer}
-          peerID={peerID}
+          videoRef={null} // not needed for remote
           name={user?.name || "User"}
-          states={peerStates[peerID] || {}}
+          muted={peerStates[peerID]?.muted}
+          hand={peerStates[peerID]?.hand}
+          cameraOff={peerStates[peerID]?.cameraOff}
+          showVideo={!!remoteStream}
+          remoteStream={remoteStream}
         />
       ))}
     </div>
@@ -35,20 +39,23 @@ function VideoGrid({ peers, userVideo, peerStates, currentUser, localStream }) {
 }
 
 // 🧍 Local or Remote Tile
-function VideoTile({ videoRef, name, muted, hand, cameraOff, showVideo = false, localStream }) {
-  React.useEffect(() => {
-    if (showVideo && !cameraOff && videoRef.current && localStream) {
-      videoRef.current.srcObject = localStream;
-      videoRef.current.play?.();
+function VideoTile({ videoRef, name, muted, hand, cameraOff, showVideo = false, localStream, remoteStream }) {
+  const ref = useRef();
+
+  useEffect(() => {
+    const stream = localStream || remoteStream;
+    if (showVideo && !cameraOff && ref.current && stream) {
+      ref.current.srcObject = stream;
+      ref.current.play?.();
     }
-  }, [showVideo, cameraOff, localStream, videoRef]);
+  }, [showVideo, cameraOff, localStream, remoteStream]);
 
   return (
     <div className="relative w-full aspect-video bg-black rounded overflow-hidden shadow">
       {showVideo && !cameraOff ? (
         <video
-          ref={videoRef}
-          muted
+          ref={ref}
+          muted={!!localStream}
           autoPlay
           playsInline
           className="w-full h-full object-cover transition-opacity duration-300"
@@ -57,40 +64,6 @@ function VideoTile({ videoRef, name, muted, hand, cameraOff, showVideo = false, 
         <Avatar name={name} />
       )}
       <StatusBar name={name} muted={muted} hand={hand} cameraOff={cameraOff} />
-    </div>
-  );
-}
-
-// 👥 Peer Tile
-function PeerVideoTile({ peer, peerID, name = "User", states }) {
-  const ref = useRef();
-  const [videoOn, setVideoOn] = useState(true);
-
-  useEffect(() => {
-    peer.on("stream", (stream) => {
-      if (ref.current) {
-        ref.current.srcObject = stream;
-      }
-    });
-  }, [peer]);
-
-  useEffect(() => {
-    setVideoOn(!states?.cameraOff);
-  }, [states?.cameraOff]);
-
-  return (
-    <div className="relative w-full aspect-video bg-black rounded overflow-hidden shadow">
-      {videoOn ? (
-        <video
-          ref={ref}
-          autoPlay
-          playsInline
-          className="w-full h-full object-cover transition-opacity duration-300"
-        />
-      ) : (
-        <Avatar name={name} />
-      )}
-      <StatusBar name={name} muted={states?.muted} hand={states?.hand} cameraOff={states?.cameraOff} />
     </div>
   );
 }
