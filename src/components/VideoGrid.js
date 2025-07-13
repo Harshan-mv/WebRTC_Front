@@ -20,7 +20,7 @@ function VideoGrid({ peers, userVideo, peerStates, currentUser, localStream }) {
         stream={localStream}
       />
 
-      {/* Peers */}
+      {/* Remote Peers */}
       {peers.map(({ peerID, remoteStream, user }) => (
         <VideoTile
           key={peerID}
@@ -36,9 +36,10 @@ function VideoGrid({ peers, userVideo, peerStates, currentUser, localStream }) {
   );
 }
 
-// 🧍 Reusable Video Tile
+// 🎬 Individual Video Tile
 function VideoTile({ videoRef, name, muted, hand, cameraOff, isLocal, stream }) {
-  const ref = videoRef || useRef();
+  const internalRef = useRef(); // ✅ Always call useRef
+  const ref = videoRef ?? internalRef; // Use provided ref for local, else internal for remote
 
   useEffect(() => {
     if (stream && ref.current && !cameraOff) {
@@ -70,7 +71,7 @@ function VideoTile({ videoRef, name, muted, hand, cameraOff, isLocal, stream }) 
   );
 }
 
-// 🧑 Avatar with initials
+// 👤 Avatar fallback
 function Avatar({ name = "User" }) {
   const initials = name
     .split(" ")
@@ -86,7 +87,7 @@ function Avatar({ name = "User" }) {
   );
 }
 
-// 🔘 Bottom bar
+// 🟡 Status bar with icons
 function StatusBar({ name, muted, hand, cameraOff }) {
   return (
     <div className="absolute bottom-1 left-1 right-1 text-white bg-black bg-opacity-60 px-2 py-1 text-sm flex justify-between items-center rounded">
