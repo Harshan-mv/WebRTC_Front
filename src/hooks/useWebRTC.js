@@ -41,12 +41,17 @@ const useWebRTC = (roomId, currentUser) => {
         setPeers((prev) => [...prev, { peerID: callerID, peer, user, remoteStream: null }]);
       });
 
-      socket.on("receiving-returned-signal", ({ id, signal }) => {
-        const peerObj = peers.find((p) => p.peerID === id);
-        if (peerObj) {
-          peerObj.peer.signal(signal);
-        }
+            socket.on("receiving-returned-signal", ({ id, signal }) => {
+        setPeers((prevPeers) => {
+          return prevPeers.map((p) => {
+            if (p.peerID === id) {
+              p.peer.signal(signal);
+            }
+            return p;
+          });
+        });
       });
+
 
       cleanup = () => {
         stream.getTracks().forEach((t) => t.stop());
