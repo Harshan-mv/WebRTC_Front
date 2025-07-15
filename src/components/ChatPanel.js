@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../context/SocketContext";
+import "../styles/ChatPanel.scss"; // ✅ SCSS import
 
 function ChatPanel({ roomId, user }) {
   const socket = useSocket();
@@ -11,7 +12,6 @@ function ChatPanel({ roomId, user }) {
   useEffect(() => {
     if (!socket) return;
 
-    // Receive incoming messages
     const handleMessage = (msg) => {
       setMessages((prev) => [...prev, msg]);
     };
@@ -42,8 +42,6 @@ function ChatPanel({ roomId, user }) {
         time: new Date().toLocaleTimeString(),
         text,
       };
-
-      // Only emit to backend — let backend echo it back for proper "self" labeling
       socket.emit("chat-message", { roomId, ...msg });
       setText("");
     }
@@ -54,29 +52,29 @@ function ChatPanel({ roomId, user }) {
   };
 
   return (
-    <div className="w-full md:w-1/3 h-64 overflow-y-auto border-t mt-4 bg-white rounded">
-      <div className="p-2 font-bold bg-gray-100">Chat</div>
+    <div className="chat-panel">
+      <div className="chat-header">Chat</div>
 
-      <div className="p-2 h-44 overflow-y-scroll">
+      <div className="chat-messages">
         {messages.map((m, idx) => (
-          <div key={idx} className="mb-2">
-            <div className="text-sm font-semibold">
+          <div key={idx} className="chat-message">
+            <div className="message-meta">
               {m.self ? "You" : m.user}{" "}
-              <span className="text-gray-400 text-xs">{m.time}</span>
+              <span className="message-time">{m.time}</span>
             </div>
-            <div className="text-sm">{m.text}</div>
+            <div className="message-text">{m.text}</div>
           </div>
         ))}
         <div ref={bottomRef} />
       </div>
 
       {typingUser && (
-        <div className="text-xs px-3 text-gray-500">
+        <div className="typing-indicator">
           💬 {typingUser} is typing...
         </div>
       )}
 
-      <div className="flex border-t">
+      <div className="chat-input">
         <input
           value={text}
           onChange={(e) => {
@@ -84,11 +82,8 @@ function ChatPanel({ roomId, user }) {
             handleTyping();
           }}
           placeholder="Type a message..."
-          className="flex-grow p-2"
         />
-        <button onClick={sendMessage} className="px-4 bg-blue-500 text-white">
-          Send
-        </button>
+        <button onClick={sendMessage}>Send</button>
       </div>
     </div>
   );

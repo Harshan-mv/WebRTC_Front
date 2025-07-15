@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
 import { useNavigate } from "react-router-dom";
+import "../styles/Lobby.scss"; // ✅ SCSS import
 
 function Lobby() {
   const socket = useSocket();
@@ -8,18 +9,16 @@ function Lobby() {
   const [now, setNow] = useState(Date.now());
   const navigate = useNavigate();
 
-  // Countdown timer updater
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch room list from server
   useEffect(() => {
     if (!socket) return;
 
     socket.on("public-rooms", (rooms) => {
-      const visibleRooms = rooms.filter((room) => !room.isPrivate); // 🔒 filter private
+      const visibleRooms = rooms.filter((room) => !room.isPrivate);
       setPublicRooms(visibleRooms);
     });
 
@@ -37,29 +36,26 @@ function Lobby() {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">🔓 Public Rooms Lobby</h2>
+    <div className="lobby-page">
+      <h2 className="lobby-heading">🔓 Public Rooms Lobby</h2>
 
       {publicRooms.length === 0 ? (
-        <p className="text-gray-600">No public rooms available.</p>
+        <p className="no-rooms">No public rooms available.</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="room-list">
           {publicRooms.map((room) => (
-            <li
-              key={room.roomId}
-              className="border p-4 rounded shadow-sm bg-white"
-            >
+            <li key={room.roomId} className="room-item">
               <p><strong>Room ID:</strong> {room.roomId}</p>
               <p><strong>Host:</strong> {room.host}</p>
               <p><strong>Users:</strong> {room.users}</p>
               {room.expiresAt && (
-                <p className="text-red-500">
+                <p className="room-timer">
                   ⏳ Deleting in: {formatTimeLeft(room.expiresAt)}
                 </p>
               )}
               <button
                 onClick={() => handleJoin(room.roomId)}
-                className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="join-button"
               >
                 🔗 Join Room
               </button>

@@ -1,3 +1,4 @@
+// pages/RoomPage.js
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import useWebRTC from "../hooks/useWebRTC";
@@ -5,6 +6,7 @@ import VideoGrid from "../components/VideoGrid";
 import { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
 import ChatPanel from "../components/ChatPanel";
+import "../styles/RoomPage.scss"; // ✅ Add this import
 
 function RoomPage() {
   const { roomId } = useParams();
@@ -26,18 +28,16 @@ function RoomPage() {
   const [expiresAt, setExpiresAt] = useState(null);
   const [remainingTime, setRemainingTime] = useState(null);
 
-  // ✅ Emit join-room to server when user enters room
   useEffect(() => {
     if (socket && user && roomId) {
       socket.emit("join-room", {
         roomId,
         user,
-        isPrivate: false, // Set this as needed
+        isPrivate: false,
       });
     }
   }, [socket, user, roomId]);
 
-  // Receive timer info from backend
   useEffect(() => {
     if (!socket) return;
 
@@ -46,25 +46,17 @@ function RoomPage() {
     };
 
     socket.on("room-empty-timer", handleTimer);
-
     return () => socket.off("room-empty-timer", handleTimer);
   }, [socket]);
 
-  // Countdown updater
   useEffect(() => {
-    if (!expiresAt) {
-      setRemainingTime(null);
-      return;
-    }
+    if (!expiresAt) return setRemainingTime(null);
 
     const interval = setInterval(() => {
       const now = Date.now();
       const secondsLeft = Math.max(Math.floor((expiresAt - now) / 1000), 0);
       setRemainingTime(secondsLeft);
-
-      if (secondsLeft <= 0) {
-        clearInterval(interval);
-      }
+      if (secondsLeft <= 0) clearInterval(interval);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -82,12 +74,11 @@ function RoomPage() {
   };
 
   return (
-    <div className="p-4 min-h-screen bg-gray-100">
-      <h2 className="text-xl font-bold mb-2 text-center">Room: {roomId}</h2>
+    <div className="room-page">
+      <h2 className="room-title">Room: {roomId}</h2>
 
-      {/* ⏳ Countdown */}
       {remainingTime !== null && (
-        <div className="text-center mb-4 text-red-600 font-semibold">
+        <div className="room-timer">
           Room will auto-delete in {remainingTime} sec unless someone rejoins.
         </div>
       )}
@@ -100,43 +91,34 @@ function RoomPage() {
         localStream={localStream}
       />
 
-      <div className="flex flex-wrap gap-3 justify-center mt-6">
+      <div className="controls">
         <button
           onClick={toggleMute}
-          className={`px-4 py-2 rounded text-white ${
-            peerStates.localMuted ? "bg-green-600" : "bg-blue-600"
-          }`}
+          className={peerStates.localMuted ? "btn unmute" : "btn mute"}
         >
           {peerStates.localMuted ? "🎤 Unmute" : "🔇 Mute"}
         </button>
 
         <button
           onClick={toggleCamera}
-          className={`px-4 py-2 rounded text-white ${
-            peerStates.localCameraOff ? "bg-green-700" : "bg-purple-600"
-          }`}
+          className={peerStates.localCameraOff ? "btn cam-on" : "btn cam-off"}
         >
           {peerStates.localCameraOff ? "🎥 Turn Camera On" : "📷 Turn Camera Off"}
         </button>
 
         <button
           onClick={handleRaiseHand}
-          className={`px-4 py-2 rounded ${
-            handRaised ? "bg-yellow-500 text-black" : "bg-yellow-300 text-black"
-          }`}
+          className={handRaised ? "btn hand-down" : "btn hand-up"}
         >
           {handRaised ? "🙌 Lower Hand" : "✋ Raise Hand"}
         </button>
 
-        <button
-          onClick={handleLeave}
-          className="px-4 py-2 bg-red-600 text-white rounded"
-        >
+        <button onClick={handleLeave} className="btn leave">
           🚪 Leave Room
         </button>
       </div>
 
-      <div className="mt-6">
+      <div className="chat-wrapper">
         <ChatPanel roomId={roomId} user={user} />
       </div>
     </div>

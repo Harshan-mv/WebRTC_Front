@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../styles/RoomCreate.scss"; // ✅ Import SCSS
 
 function RoomCreate() {
   const [isPrivate, setIsPrivate] = useState(false);
@@ -41,18 +42,20 @@ function RoomCreate() {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-2">Create Room</h2>
-      <label>Capacity (2-6):</label>
+    <div className="room-create-page">
+      <h2 className="heading">Create Room</h2>
+
+      <label>Capacity (2–6):</label>
       <input
         type="number"
         value={capacity}
         min="2"
         max="6"
         onChange={(e) => setCapacity(Number(e.target.value))}
-        className="border p-1 w-full"
+        className="input"
       />
-      <label className="block mt-2">
+
+      <label className="checkbox-label">
         <input
           type="checkbox"
           checked={isPrivate}
@@ -60,33 +63,30 @@ function RoomCreate() {
         />{" "}
         Private Room
       </label>
+
       {isPrivate && (
         <input
           type="text"
           value={pin}
           placeholder="Enter PIN"
           onChange={(e) => setPin(e.target.value)}
-          className="border p-1 w-full mt-2"
+          className="input"
         />
       )}
-      <button
-        onClick={createRoom}
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-      >
+
+      <button onClick={createRoom} className="create-button">
         Create
       </button>
 
       {showMsg && (
-        <div className="mt-4 p-2 bg-green-100 border border-green-400 rounded">
+        <div className="room-created-box">
           ✅ Room Created! Share or copy this Room ID:
-          <pre className="text-lg font-bold">{roomId}</pre>
-          <p className="text-sm text-gray-700">
-            Auto joining in 10 seconds...
-          </p>
+          <pre className="room-id">{roomId}</pre>
+          <p className="join-info">Auto joining in 10 seconds...</p>
         </div>
       )}
 
-      {error && <p className="mt-2 text-red-600">{error}</p>}
+      {error && <p className="error-msg">{error}</p>}
     </div>
   );
 }

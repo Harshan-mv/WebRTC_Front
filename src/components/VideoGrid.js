@@ -4,12 +4,11 @@ import {
   FaHandPaper,
   FaVideoSlash,
 } from "react-icons/fa";
+import "../styles/VideoGrid.scss"; // ✅ SCSS import
 
-// 🎥 Main Video Grid
 function VideoGrid({ peers, userVideo, peerStates, currentUser, localStream }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-      {/* Local User */}
+    <div className="video-grid">
       <VideoTile
         videoRef={userVideo}
         name={currentUser?.name || "You"}
@@ -19,8 +18,6 @@ function VideoGrid({ peers, userVideo, peerStates, currentUser, localStream }) {
         isLocal
         stream={localStream}
       />
-
-      {/* Remote Peers */}
       {peers.map(({ peerID, remoteStream, user }) => (
         <VideoTile
           key={peerID}
@@ -36,10 +33,9 @@ function VideoGrid({ peers, userVideo, peerStates, currentUser, localStream }) {
   );
 }
 
-// 🎬 Individual Video Tile
 function VideoTile({ videoRef, name, muted, hand, cameraOff, isLocal, stream }) {
-  const internalRef = useRef(); // ✅ Always call useRef
-  const ref = videoRef ?? internalRef; // Use provided ref for local, else internal for remote
+  const internalRef = useRef();
+  const ref = videoRef ?? internalRef;
 
   useEffect(() => {
     if (stream && ref.current && !cameraOff) {
@@ -54,14 +50,14 @@ function VideoTile({ videoRef, name, muted, hand, cameraOff, isLocal, stream }) 
   }, [stream, cameraOff, ref]);
 
   return (
-    <div className="relative w-full aspect-video bg-black rounded overflow-hidden shadow">
+    <div className="video-tile">
       {!cameraOff && stream ? (
         <video
           ref={ref}
           autoPlay
           playsInline
           muted={isLocal}
-          className="w-full h-full object-cover transition-opacity duration-300"
+          className="video"
         />
       ) : (
         <Avatar name={name} />
@@ -71,7 +67,6 @@ function VideoTile({ videoRef, name, muted, hand, cameraOff, isLocal, stream }) 
   );
 }
 
-// 👤 Avatar fallback
 function Avatar({ name = "User" }) {
   const initials = name
     .split(" ")
@@ -81,21 +76,20 @@ function Avatar({ name = "User" }) {
     .toUpperCase();
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gray-700 text-white text-3xl font-bold animate-fade-in">
+    <div className="avatar">
       {initials}
     </div>
   );
 }
 
-// 🟡 Status bar with icons
 function StatusBar({ name, muted, hand, cameraOff }) {
   return (
-    <div className="absolute bottom-1 left-1 right-1 text-white bg-black bg-opacity-60 px-2 py-1 text-sm flex justify-between items-center rounded">
+    <div className="status-bar">
       <span>{name}</span>
-      <div className="flex gap-2">
-        {muted && <FaMicrophoneSlash className="text-red-500" title="Muted" />}
-        {hand && <FaHandPaper className="text-yellow-300" title="Hand Raised" />}
-        {cameraOff && <FaVideoSlash className="text-gray-300" title="Camera Off" />}
+      <div className="status-icons">
+        {muted && <FaMicrophoneSlash className="muted-icon" title="Muted" />}
+        {hand && <FaHandPaper className="hand-icon" title="Hand Raised" />}
+        {cameraOff && <FaVideoSlash className="camera-icon" title="Camera Off" />}
       </div>
     </div>
   );

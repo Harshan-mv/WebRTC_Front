@@ -1,0 +1,75 @@
+.room-page {
+  padding: 1rem;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+.room-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.room-timer {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: bold;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &.mute {
+      background-color: #2563eb;
+    }
+
+    &.unmute {
+      background-color: #16a34a;
+    }
+
+    &.cam-off {
+      background-color: #7c3aed;
+    }
+
+    &.cam-on {
+      background-color: #047857;
+    }
+
+    &.hand-up {
+      background-color: #fde68a;
+      color: #111827;
+    }
+
+    &.hand-down {
+      background-color: #f59e0b;
+      color: #111827;
+    }
+
+    &.leave {
+      background-color: #dc2626;
+    }
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+.chat-wrapper {
+  margin-top: 2rem;
+}

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "../styles/RoomJoin.scss"; // ✅ SCSS import
 
 function RoomJoin() {
   const [roomId, setRoomId] = useState("");
@@ -17,10 +18,10 @@ function RoomJoin() {
         `${process.env.REACT_APP_BACKEND_URL}/api/room/join`,
         {
           roomId,
-          pin
+          pin,
         },
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -31,29 +32,30 @@ function RoomJoin() {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-2">Join Room</h2>
+    <div className="room-join-page">
+      <h2 className="heading">Join Room</h2>
+
       <input
         type="text"
         placeholder="Room ID"
         value={roomId}
         onChange={(e) => setRoomId(e.target.value)}
-        className="border p-1 w-full"
+        className="input"
       />
+
       <input
         type="text"
         placeholder="PIN (if any)"
         value={pin}
         onChange={(e) => setPin(e.target.value)}
-        className="border p-1 w-full mt-2"
+        className="input"
       />
-      <button
-        onClick={joinRoom}
-        className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
-      >
+
+      <button onClick={joinRoom} className="join-button">
         Join
       </button>
-      {error && <p className="mt-2 text-red-600">{error}</p>}
+
+      {error && <p className="error-msg">{error}</p>}
     </div>
   );
 }

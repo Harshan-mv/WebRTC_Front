@@ -1,0 +1,74 @@
+.home-page {
+  padding: 1rem;
+  text-align: center;
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.welcome-heading {
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+.profile-image {
+  margin: 1rem auto;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 9999px;
+  border: 2px solid #ccc;
+  object-fit: cover;
+}
+
+.nav-links {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.link {
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
+
+  &.blue {
+    color: #3b82f6;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &.green {
+    color: #10b981;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &.purple {
+    color: #8b5cf6;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
